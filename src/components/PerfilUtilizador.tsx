@@ -1,224 +1,197 @@
 import React from 'react';
-import { X, Info, Heart, AlertTriangle, CheckCircle, TrendingDown, TrendingUp } from 'lucide-react';
+import { X, User, TrendingUp, TrendingDown, Heart, Brain, Activity, Shield, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useAtlasStore } from '../store/useAtlasStore';
-import { calculateOrganHealth } from '../utils/organHealthCalculator';
-import organsData from '../data/organs.json';
 
 export const PerfilUtilizador: React.FC = () => {
-  const { focusOrganId, setFocusOrgan, meters, selectedHabits } = useAtlasStore();
+  const { showUserProfile, setShowUserProfile, meters, selectedHabits } = useAtlasStore();
 
-  if (!focusOrganId) return null;
+  if (!showUserProfile) return null;
 
-  const organ = organsData.organs.find(o => o.id === focusOrganId);
-  if (!organ) return null;
-
-  // Use exponential organ health calculation
-  const organHealth = meters.organHealth?.[focusOrganId] || 80;
-  const healthRatio = organHealth / 100;
-  
-  // Determine risk level based on exponential factors
-  const exponentialFactors = meters.exponentialFactors || { positive: [], negative: [] };
-  const riskLevel = healthRatio >= 0.8 ? 'low' : healthRatio >= 0.6 ? 'moderate' : healthRatio >= 0.4 ? 'high' : 'critical';
-  
-  // Generate personalized message based on exponential impacts
-  const personalizedMessage = generateExponentialOrganMessage(focusOrganId, organHealth, exponentialFactors, selectedHabits);
-  
-  const getOrganStatus = () => {
-    if (healthRatio >= 0.8) return { status: 'Excelente', color: 'text-green-600', bg: 'bg-green-50' };
-    if (healthRatio >= 0.6) return { status: 'Bom', color: 'text-yellow-600', bg: 'bg-yellow-50' };
-    if (healthRatio >= 0.4) return { status: 'Preocupante', color: 'text-orange-600', bg: 'bg-orange-50' };
+  const getHealthStatus = (value: number) => {
+    if (value >= 80) return { status: 'Excelente', color: 'text-green-600', bg: 'bg-green-50' };
+    if (value >= 60) return { status: 'Bom', color: 'text-yellow-600', bg: 'bg-yellow-50' };
+    if (value >= 40) return { status: 'Preocupante', color: 'text-orange-600', bg: 'bg-orange-50' };
     return { status: 'Crítico', color: 'text-red-600', bg: 'bg-red-50' };
   };
 
-  const organStatus = getOrganStatus();
+  const overallHealth = meters.overallWellness || 75;
+  const healthStatus = getHealthStatus(overallHealth);
 
-  const getPersonalizedAdvice = () => {
-    const badHabits = exponentialFactors.negative;
-    const goodHabits = exponentialFactors.positive;
-    
-    let advice = [];
-    
-    if (badHabits.length > 0) {
-      const worstHabit = badHabits.reduce((worst, current) => 
-        current.impact > worst.impact ? current : worst
-      );
-      
-      advice.push({
-        type: 'warning',
-        text: `O teu ${worstHabit.habit.toLowerCase()} tem impacto exponencial negativo neste órgão. Este hábito pode anular múltiplos benefícios de outros hábitos saudáveis.`,
-        icon: <AlertTriangle className="w-4 h-4 text-orange-500" />
-      });
-    }
-    
-    if (goodHabits.length > 0) {
-      const bestHabit = goodHabits.reduce((best, current) => 
-        current.impact > best.impact ? current : best
-      );
-      
-      advice.push({
-        type: 'success',
-        text: `O teu ${bestHabit.habit.toLowerCase()} proporciona benefícios exponenciais. Este hábito pode compensar múltiplos fatores negativos.`,
-        icon: <CheckCircle className="w-4 h-4 text-green-500" />
-      });
-    }
-    
-    if (organHealth < 60) {
-      advice.push({
-        type: 'critical',
-        text: `Este órgão está em estado preocupante devido a fatores exponenciais. Recomenda-se consultar um profissional de saúde.`,
-        icon: <AlertTriangle className="w-4 h-4 text-red-500" />
-      });
-    }
-    
-    return advice;
+  const getTopPositiveFactors = () => {
+    if (!meters.exponentialFactors?.positive) return [];
+    return meters.exponentialFactors.positive
+      .sort((a, b) => b.impact - a.impact)
+      .slice(0, 3);
   };
 
-  const personalizedAdvice = getPersonalizedAdvice();
-  
-  // Get relevant exponential factors for this organ
-  const relevantFactors = getRelevantExponentialFactors(focusOrganId, exponentialFactors, selectedHabits);
-  
+  const getTopNegativeFactors = () => {
+    if (!meters.exponentialFactors?.negative) return [];
+    return meters.exponentialFactors.negative
+      .sort((a, b) => Math.abs(b.impact) - Math.abs(a.impact))
+      .slice(0, 3);
+  };
+
+  const topPositiveFactors = getTopPositiveFactors();
+  const topNegativeFactors = getTopNegativeFactors();
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center space-x-3">
             <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-              <Heart className="w-6 h-6 text-blue-600" />
+              <User className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">{organ.name}</h2>
-              <p className="text-sm text-gray-600">Sistema {organ.system}</p>
+              <h2 className="text-xl font-semibold text-gray-900">Perfil de Saúde Inteligente</h2>
+              <p className="text-sm text-gray-600">Resumo personalizado do teu bem-estar</p>
             </div>
           </div>
           <button
-            onClick={() => setFocusOrgan(undefined)}
+            onClick={() => setShowUserProfile(false)}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            aria-label="Fechar vista do órgão"
+            aria-label="Fechar perfil"
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
 
-        {/* Status */}
-        <div className={`mx-6 mt-6 p-4 rounded-lg ${organStatus.bg}`}>
+        {/* Overall Health Status */}
+        <div className={`mx-6 mt-6 p-4 rounded-lg ${healthStatus.bg}`}>
           <div className="flex items-center space-x-2">
-            <Info className={`w-5 h-5 ${organStatus.color}`} />
-            <span className={`font-semibold ${organStatus.color}`}>
-              Estado atual: {organStatus.status}
+            <Heart className={`w-5 h-5 ${healthStatus.color}`} />
+            <span className={`font-semibold ${healthStatus.color}`}>
+              Estado Geral: {healthStatus.status}
             </span>
             <span className="text-sm text-gray-600">
-              ({Math.round(organHealth)}% de saúde)
+              ({Math.round(overallHealth)}% de bem-estar)
             </span>
           </div>
-          <p className="text-sm text-gray-700 mt-3">
-            {personalizedMessage}
-          </p>
         </div>
 
-        {/* Personalized Advice */}
-        {personalizedAdvice.length > 0 && (
-          <div className="mx-6 mt-4 space-y-3">
-            <h4 className="font-semibold text-gray-900">Conselhos Personalizados</h4>
-            {personalizedAdvice.map((advice, index) => (
-              <div key={index} className={`p-3 rounded-lg flex items-start space-x-3 ${
-                advice.type === 'warning' ? 'bg-orange-50' :
-                advice.type === 'success' ? 'bg-green-50' :
-                'bg-red-50'
-              }`}>
-                {advice.icon}
-                <p className="text-sm text-gray-700 flex-1">{advice.text}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Exponential Factors Affecting This Organ */}
-        {relevantFactors.length > 0 && (
-          <div className="mx-6 mt-4">
-            <h4 className="font-semibold text-gray-900 mb-3">Fatores Exponenciais para Este Órgão</h4>
-            <div className="space-y-2">
-              {relevantFactors.map((factor, index) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <div className="flex items-center space-x-2">
-                    {factor.type === 'positive' ? (
-                      <TrendingUp className="w-4 h-4 text-green-500" />
-                    ) : (
-                      <TrendingDown className="w-4 h-4 text-red-500" />
-                    )}
-                    <div>
-                      <span className="text-sm font-medium">{habitName}</span>
-                      <p className="text-xs text-gray-500">{mechanism}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs text-gray-500">
-                      Nível {level}
-                    </span>
-                    <span className={`text-xs font-medium ${
-                      impact > 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {impact > 0 ? '+' : ''}{Math.round(Math.abs(impact))}%
-                    </span>
-                  </div>
-                </div>
-              ))}
+        {/* Health Metrics Grid */}
+        <div className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Métricas de Saúde</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-gray-50 p-4 rounded-lg text-center">
+              <Heart className="w-6 h-6 text-red-500 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">{Math.round(meters.health || 75)}%</div>
+              <div className="text-sm text-gray-600">Saúde Física</div>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg text-center">
+              <Brain className="w-6 h-6 text-purple-500 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">{Math.round(meters.mentalHealth || 70)}%</div>
+              <div className="text-sm text-gray-600">Saúde Mental</div>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg text-center">
+              <Activity className="w-6 h-6 text-green-500 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">{Math.round(meters.physicalFitness || 65)}%</div>
+              <div className="text-sm text-gray-600">Condição Física</div>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg text-center">
+              <Shield className="w-6 h-6 text-blue-500 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">{Math.round(100 - (meters.diseaseRisk || 25))}%</div>
+              <div className="text-sm text-gray-600">Resistência</div>
             </div>
           </div>
-        )}
-        {/* What Happens Section */}
-        <div className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-            <span className="w-2 h-6 bg-red-500 rounded-full mr-3"></span>
-            O que acontece
-          </h3>
-          <p className="text-gray-700 leading-relaxed mb-6">
-            {organ.narration.what_happens}
-          </p>
+        </div>
 
-          <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-            <span className="w-2 h-6 bg-green-500 rounded-full mr-3"></span>
-            O que ajuda
-          </h3>
-          <p className="text-gray-700 leading-relaxed mb-6">
-            {organ.narration.what_helps}
-          </p>
+        {/* Quality of Life Metrics */}
+        <div className="px-6 pb-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Qualidade de Vida</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-yellow-50 p-4 rounded-lg">
+              <div className="text-lg font-semibold text-yellow-800">Felicidade</div>
+              <div className="text-2xl font-bold text-yellow-900">{Math.round(meters.happiness || 70)}%</div>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="text-lg font-semibold text-blue-800">Qualidade de Vida</div>
+              <div className="text-2xl font-bold text-blue-900">{Math.round(meters.qualityOfLife || 72)}%</div>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <div className="text-lg font-semibold text-green-800">Expectativa de Vida</div>
+              <div className="text-2xl font-bold text-green-900">{Math.round(meters.lifeExpectancy || 78)} anos</div>
+            </div>
+          </div>
+        </div>
 
-          {/* Metrics */}
-          <div className="border-t pt-6">
-            <h4 className="font-semibold text-gray-900 mb-3">Métricas Monitorizadas</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {organ.metrics.map((metric) => (
-                <div key={metric} className="bg-gray-50 p-3 rounded-lg text-center">
-                  <span className="text-sm text-gray-600 capitalize">
-                    {metric.replace(/_/g, ' ')}
+        {/* Top Positive Factors */}
+        {topPositiveFactors.length > 0 && (
+          <div className="px-6 pb-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+              <TrendingUp className="w-5 h-5 text-green-500 mr-2" />
+              Principais Fatores Positivos
+            </h3>
+            <div className="space-y-2">
+              {topPositiveFactors.map((factor, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <div>
+                      <span className="font-medium text-green-800">{factor.habit}</span>
+                      <p className="text-sm text-green-600">{factor.mechanism}</p>
+                    </div>
+                  </div>
+                  <span className="text-green-700 font-semibold">
+                    +{Math.round(factor.impact)}%
                   </span>
                 </div>
               ))}
             </div>
           </div>
+        )}
 
-          {/* Recovery Tips */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-semibold text-blue-900 mb-2">Dicas de Recuperação</h4>
-            <ul className="text-sm text-blue-800 space-y-1">
-              {riskLevel === 'high' || riskLevel === 'critical' && <li>• Reduz gradualmente os hábitos prejudiciais</li>}
-              {!selectedHabits['exercise']?.level && <li>• Aumenta a atividade física regular</li>}
-              {!selectedHabits['healthy_diet']?.level && <li>• Mantém uma alimentação equilibrada</li>}
-              {!selectedHabits['sleep_consistency']?.level && <li>• Garante um sono reparador</li>}
-              {riskLevel === 'critical' && <li>• Procura apoio médico se necessário</li>}
-              {selectedHabits['smoking']?.level > 0 && <li>• Considera programas de cessação tabágica</li>}
-              {selectedHabits['alcohol']?.level > 2 && <li>• Reduz o consumo de álcool gradualmente</li>}
-              {!selectedHabits['hydration']?.level && <li>• Mantém uma hidratação adequada</li>}
-            </ul>
+        {/* Top Negative Factors */}
+        {topNegativeFactors.length > 0 && (
+          <div className="px-6 pb-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+              <TrendingDown className="w-5 h-5 text-red-500 mr-2" />
+              Principais Fatores de Risco
+            </h3>
+            <div className="space-y-2">
+              {topNegativeFactors.map((factor, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <AlertTriangle className="w-4 h-4 text-red-500" />
+                    <div>
+                      <span className="font-medium text-red-800">{factor.habit}</span>
+                      <p className="text-sm text-red-600">{factor.mechanism}</p>
+                    </div>
+                  </div>
+                  <span className="text-red-700 font-semibold">
+                    {Math.round(factor.impact)}%
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Prioritized Recommendations */}
+        {meters.prioritizedRecommendations && meters.prioritizedRecommendations.length > 0 && (
+          <div className="px-6 pb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Recomendações Prioritárias</h3>
+            <div className="space-y-3">
+              {meters.prioritizedRecommendations.slice(0, 5).map((recommendation, index) => (
+                <div key={index} className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                  <div className="flex items-start space-x-2">
+                    <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">
+                      #{index + 1}
+                    </span>
+                    <p className="text-blue-800 text-sm flex-1">{recommendation}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="p-6 bg-gray-50 border-t">
           <p className="text-xs text-gray-500 text-center">
-            Esta informação é apenas educativa. Consulta um profissional de saúde para orientação médica.
+            Esta informação é baseada nos teus hábitos atuais e é apenas educativa. 
+            Consulta um profissional de saúde para orientação médica personalizada.
           </p>
         </div>
       </div>
