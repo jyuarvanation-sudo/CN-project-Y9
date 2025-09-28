@@ -196,6 +196,22 @@ export const useAtlasStore = create<AtlasState>()(
     {
       name: 'atlas-habits-storage',
       version: 3, // Incremented version for rebalanced calculation system
+      migrate: (persistedState: any, version: number) => {
+        // For any version prior to 3, return default state to prevent migration errors
+        if (version < 3) {
+          return {
+            selectedHabits: {},
+            meters: calculateMeters({}),
+            focusOrganId: undefined,
+            compareMode: 'off',
+            accessibility: {
+              reduceMotion: false,
+              highContrast: false,
+            },
+          };
+        }
+        return persistedState;
+      },
     }
   )
 );
