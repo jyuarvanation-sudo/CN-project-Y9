@@ -65,41 +65,54 @@ interface AtlasState {
 /**
  * EXPONENTIAL HEALTH IMPACT SYSTEM
  * 
- * This system implements exponential weighting for critical habits that have
- * disproportionate impacts on health outcomes. Some habits can override multiple
- * other factors, while others provide exponential benefits.
+ * This system implements specialized, realistic impacts for each habit based on
+ * medical research. Each habit has primary, secondary, and minimal effects rather
+ * than broad impacts across all metrics.
  * 
  * Based on epidemiological studies and longitudinal health research.
  */
 const calculateMeters = (habits: HabitLevels): Meters => {
-  // Use exponential health calculation system
-  const exponentialResult = calculateExponentialHealth(habits);
+  // Use specialized health calculation system
+  const healthResult = calculateExponentialHealth(habits);
   
-  // Extract values from exponential calculation
-  const health = exponentialResult.overallHealth;
-  const happiness = exponentialResult.riskAssessment.mentalHealth;
-  const mentalHealth = exponentialResult.riskAssessment.mentalHealth;
-  const physicalFitness = exponentialResult.riskAssessment.physicalHealth;
-  const lifeExpectancy = exponentialResult.riskAssessment.lifeExpectancy;
-  const diseaseRisk = exponentialResult.riskAssessment.diseaseRisk;
+  // Extract values from specialized calculation
+  const health = healthResult.overallHealth;
+  const physicalHealth = healthResult.riskAssessment.physicalHealth;
+  const mentalHealth = healthResult.riskAssessment.mentalHealth;
+  const lifeExpectancy = healthResult.riskAssessment.lifeExpectancy;
+  const diseaseRisk = healthResult.riskAssessment.diseaseRisk;
+  
+  // Calculate happiness based on social and mental factors
+  const socialLevel = habits.social_connection?.level || 0;
+  const stressLevel = habits.chronic_stress?.level || 0;
+  const exerciseLevel = habits.exercise?.level || 0;
+  const happiness = Math.max(10, Math.min(100, 50 + (socialLevel * 12) + (exerciseLevel * 8) - (stressLevel * 15)));
+  
+  // Calculate physical fitness based on exercise and sedentary behavior
+  const sedentaryLevel = habits.sedentary?.level || 0;
+  const physicalFitness = Math.max(10, Math.min(100, 50 + (exerciseLevel * 15) - (sedentaryLevel * 12)));
   
   // Calculate composite metrics
-  const qualityOfLife = Math.max(0, Math.min(100, (health + happiness + mentalHealth) / 3));
-  const overallWellness = Math.max(0, Math.min(100, (health + happiness + physicalFitness) / 3));
+  const qualityOfLife = Math.max(10, Math.min(100, (health + happiness + mentalHealth) / 3));
+  const overallWellness = Math.max(10, Math.min(100, (health + happiness + physicalFitness) / 3));
   
-  // Calculate detailed stats based on exponential factors
-  const negativeImpact = exponentialResult.exponentialFactors.negative.reduce((sum, factor) => sum + factor.impact, 0);
-  const positiveImpact = exponentialResult.exponentialFactors.positive.reduce((sum, factor) => sum + factor.impact, 0);
+  // Calculate detailed stats based on specialized factors
+  const sleepLevel = habits.sleep_consistency?.level || 0;
+  const hydrationLevel = habits.hydration?.level || 0;
+  const meditationLevel = habits.meditation?.level || 0;
+  const alcoholLevel = habits.alcohol?.level || 0;
+  const smokingLevel = habits.smoking?.level || 0;
+  const processedDietLevel = habits.processed_diet?.level || 0;
   
   const stats: MeterStats = {
-    cardioStrain: Math.max(0, Math.min(10, 5 + (negativeImpact * 0.15) - (positiveImpact * 0.1))),
-    inflammation: Math.max(0, Math.min(10, 5 + (negativeImpact * 0.12) - (positiveImpact * 0.08))),
-    sleepQuality: Math.max(0, Math.min(10, 5 + ((habits.sleep_consistency?.level || 0) * 1.8) - ((habits.chronic_stress?.level || 0) * 1.5))),
-    stressLoad: Math.max(0, Math.min(10, 5 + ((habits.chronic_stress?.level || 0) * 2.2) - ((habits.meditation?.level || 0) * 1.2))),
-    recoveryCapacity: Math.max(0, Math.min(10, 5 + (positiveImpact * 0.1) - (negativeImpact * 0.08))),
-    cognitiveFunction: Math.max(0, Math.min(10, 5 + (positiveImpact * 0.12) - (negativeImpact * 0.15))),
-    immuneSystem: Math.max(0, Math.min(10, 5 + (positiveImpact * 0.1) - (negativeImpact * 0.12))),
-    metabolicHealth: Math.max(0, Math.min(10, 5 + (positiveImpact * 0.11) - (negativeImpact * 0.14))),
+    cardioStrain: Math.max(0, Math.min(10, 5 + (smokingLevel * 1.5) + (sedentaryLevel * 1.2) - (exerciseLevel * 1.8))),
+    inflammation: Math.max(0, Math.min(10, 5 + (processedDietLevel * 1.4) + (stressLevel * 1.1) - ((habits.healthy_diet?.level || 0) * 1.3))),
+    sleepQuality: Math.max(0, Math.min(10, 5 + (sleepLevel * 1.6) - (stressLevel * 1.2) - ((habits.gaming?.level || 0) * 0.8))),
+    stressLoad: Math.max(0, Math.min(10, 5 + (stressLevel * 1.8) - (meditationLevel * 1.4) - ((habits.social_connection?.level || 0) * 0.6))),
+    recoveryCapacity: Math.max(0, Math.min(10, 5 + (sleepLevel * 1.5) + (exerciseLevel * 1.0) - (alcoholLevel * 1.2))),
+    cognitiveFunction: Math.max(0, Math.min(10, 5 + ((habits.reading?.level || 0) * 1.3) + (sleepLevel * 1.1) - ((habits.drugs?.level || 0) * 2.0))),
+    immuneSystem: Math.max(0, Math.min(10, 5 + ((habits.healthy_diet?.level || 0) * 1.2) + (sleepLevel * 1.0) - (stressLevel * 1.1))),
+    metabolicHealth: Math.max(0, Math.min(10, 5 + (exerciseLevel * 1.3) + ((habits.healthy_diet?.level || 0) * 1.1) - (processedDietLevel * 1.4))),
   };
   
   return {
@@ -112,9 +125,9 @@ const calculateMeters = (habits: HabitLevels): Meters => {
     physicalFitness,
     overallWellness,
     stats,
-    exponentialFactors: exponentialResult.exponentialFactors,
-    organHealth: exponentialResult.organHealth,
-    prioritizedRecommendations: exponentialResult.prioritizedRecommendations,
+    exponentialFactors: healthResult.exponentialFactors,
+    organHealth: healthResult.organHealth,
+    prioritizedRecommendations: healthResult.prioritizedRecommendations,
   };
 };
 
@@ -182,7 +195,7 @@ export const useAtlasStore = create<AtlasState>()(
     }),
     {
       name: 'atlas-habits-storage',
-      version: 2, // Incremented version for new calculation system
+      version: 3, // Incremented version for rebalanced calculation system
     }
   )
 );
