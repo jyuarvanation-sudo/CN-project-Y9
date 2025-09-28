@@ -3,7 +3,7 @@ import { Heart, Brain, Activity, Shield, Zap, Smile, TrendingUp, Clock, Users, D
 import { useAtlasStore } from '../store/useAtlasStore';
 
 export const Medidores: React.FC = () => {
-  const { meters, accessibility } = useAtlasStore();
+  const { meters, accessibility, selectedHabits } = useAtlasStore();
 
   const CircularMeter: React.FC<{
     value: number;
@@ -118,6 +118,10 @@ export const Medidores: React.FC = () => {
     }
   };
 
+  // Force re-render when habits change by using selectedHabits as dependency
+  React.useEffect(() => {
+    // This effect ensures the component re-renders when habits change
+  }, [selectedHabits]);
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
       <div className="flex items-center justify-between mb-6">

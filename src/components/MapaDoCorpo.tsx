@@ -1,9 +1,8 @@
 import React, { useCallback, useRef } from 'react';
 import { useAtlasStore } from '../store/useAtlasStore';
-import { calculateOrganHealth } from '../utils/organHealthCalculator';
 
 export const MapaDoCorpo: React.FC = () => {
-  const { focusOrganId, setFocusOrgan, accessibility, meters, selectedHabits } = useAtlasStore();
+  const { focusOrganId, setFocusOrgan, accessibility, meters } = useAtlasStore();
   const svgRef = useRef<SVGSVGElement>(null);
 
   const handleOrganClick = useCallback((organId: string) => {
@@ -11,7 +10,6 @@ export const MapaDoCorpo: React.FC = () => {
   }, [focusOrganId, setFocusOrgan]);
 
   const getOrganColor = (organId: string, baseColor: string, affectedColor: string) => {
-    // Use exponential organ health calculation
     const organHealth = meters.organHealth?.[organId] || 80;
     const healthRatio = organHealth / 100;
     
@@ -31,8 +29,8 @@ export const MapaDoCorpo: React.FC = () => {
   };
 
   const getOrganOpacity = (organId: string) => {
-    // Use exponential organ health calculation for opacity
     const organHealth = Math.max(20, Math.min(100, meters.organHealth?.[organId] || 80));
+    return Math.max(0.3, Math.min(1.0, organHealth / 100));
   };
 
   return (

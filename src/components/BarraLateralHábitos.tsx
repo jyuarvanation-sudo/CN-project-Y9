@@ -8,7 +8,7 @@ interface HabitControlProps {
 }
 
 const HabitControl: React.FC<HabitControlProps> = ({ habit }) => {
-  const { selectedHabits, setHabitLevel } = useAtlasStore();
+  const { selectedHabits, setHabitLevel, meters } = useAtlasStore();
   const currentLevel = selectedHabits[habit.id]?.level ?? 0;
 
   const handleLevelChange = (level: number) => {
