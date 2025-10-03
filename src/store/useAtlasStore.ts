@@ -54,10 +54,17 @@ interface AtlasState {
   meters: Meters;
   focusOrganId: string | undefined;
   compareMode: 'off' | 'before' | 'after';
+  comparisonData: {
+    beforeHabits: HabitLevels;
+    beforeMeters: Meters;
+    afterHabits: HabitLevels;
+    afterMeters: Meters;
+  } | null;
   accessibility: AccessibilitySettings;
   setHabitLevel: (habitId: string, level: number) => void;
   setFocusOrgan: (organId: string | undefined) => void;
   setCompareMode: (mode: 'off' | 'before' | 'after') => void;
+  getCurrentDisplayData: () => { habits: HabitLevels; meters: Meters };
   toggleReduceMotion: () => void;
   toggleHighContrast: () => void;
 }
@@ -138,6 +145,7 @@ export const useAtlasStore = create<AtlasState>()(
       meters: calculateMeters({}),
       focusOrganId: undefined,
       compareMode: 'off',
+      comparisonData: null,
       accessibility: {
         reduceMotion: false,
         highContrast: false,
@@ -158,9 +166,22 @@ export const useAtlasStore = create<AtlasState>()(
         
         try {
           const newMeters = calculateMeters(newHabits);
+          const currentState = get();
+          
+          // Update comparison data if in comparison mode
+          let updatedComparisonData = currentState.comparisonData;
+          if (currentState.compareMode !== 'off' && currentState.comparisonData) {
+            updatedComparisonData = {
+              ...currentState.comparisonData,
+              afterHabits: newHabits,
+              afterMeters: newMeters
+            };
+          }
+          
           set({
             selectedHabits: newHabits,
             meters: newMeters,
+            comparisonData: updatedComparisonData
           });
         } catch (error) {
           console.error('Error calculating meters:', error);
@@ -172,7 +193,56 @@ export const useAtlasStore = create<AtlasState>()(
       },
       
       setCompareMode: (mode: 'off' | 'before' | 'after') => {
-        set({ compareMode: mode });
+        const currentState = get();
+        
+        if (mode !== 'off' && currentState.compareMode === 'off') {
+          // Starting comparison - save current state as "before"
+          const beforeHabits = { ...currentState.selectedHabits };
+          const beforeMeters = { ...currentState.meters };
+          
+          set({
+            compareMode: mode,
+            comparisonData: {
+              beforeHabits,
+              beforeMeters,
+              afterHabits: { ...beforeHabits },
+              afterMeters: { ...beforeMeters }
+            }
+          });
+        } else if (mode === 'off') {
+          // Ending comparison - clear comparison data
+          set({
+            compareMode: 'off',
+            comparisonData: null
+          });
+        } else {
+          // Just switching between before/after
+          set({ compareMode: mode });
+        }
+      },
+      
+      getCurrentDisplayData: () => {
+        const state = get();
+        
+        if (state.compareMode === 'off' || !state.comparisonData) {
+          return {
+            habits: state.selectedHabits,
+            meters: state.meters
+          };
+        }
+        
+        if (state.compareMode === 'before') {
+          return {
+            habits: state.comparisonData.beforeHabits,
+            meters: state.comparisonData.beforeMeters
+          };
+        } else {
+          // 'after' mode - show current state
+          return {
+            habits: state.selectedHabits,
+            meters: state.meters
+          };
+        }
       },
       
       toggleReduceMotion: () => {

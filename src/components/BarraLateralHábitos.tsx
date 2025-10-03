@@ -8,8 +8,9 @@ interface HabitControlProps {
 }
 
 const HabitControl: React.FC<HabitControlProps> = ({ habit }) => {
-  const { selectedHabits, setHabitLevel, meters } = useAtlasStore();
-  const currentLevel = selectedHabits[habit.id]?.level ?? 0;
+  const { setHabitLevel, getCurrentDisplayData, compareMode } = useAtlasStore();
+  const { habits } = getCurrentDisplayData();
+  const currentLevel = habits[habit.id]?.level ?? 0;
 
   const handleLevelChange = (level: number) => {
     // Add validation to prevent invalid states
@@ -48,7 +49,7 @@ const HabitControl: React.FC<HabitControlProps> = ({ habit }) => {
           ? 'border-red-300 bg-red-50 hover:border-red-400' 
           : 'border-green-300 bg-green-50 hover:border-green-400'
         : 'border-gray-200 hover:border-gray-300'
-    }`}>
+    } ${compareMode === 'before' ? 'opacity-75' : ''}`}>
       <div className="flex items-center justify-between mb-2">
         <span className={`text-sm font-medium ${
           currentLevel > 0
@@ -56,6 +57,12 @@ const HabitControl: React.FC<HabitControlProps> = ({ habit }) => {
             : habit.kind === 'bad' ? 'text-red-700' : 'text-green-700'
         }`}>
           {habit.name}
+          {compareMode === 'before' && (
+            <span className="ml-2 text-xs bg-blue-100 text-blue-600 px-1 rounded">📸</span>
+          )}
+          {compareMode === 'after' && (
+            <span className="ml-2 text-xs bg-green-100 text-green-600 px-1 rounded">🔄</span>
+          )}
         </span>
         <span className={`text-xs px-2 py-1 rounded ${
           currentLevel > 0
@@ -74,9 +81,10 @@ const HabitControl: React.FC<HabitControlProps> = ({ habit }) => {
             <button
               key={index}
               onClick={() => handleLevelChange(index)}
+              disabled={compareMode === 'before'}
               className={`px-2 py-1 text-xs font-medium rounded transition-all duration-200 ${
                 getButtonColor(index, currentLevel === index)
-              }`}
+              } ${compareMode === 'before' ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
               aria-pressed={currentLevel === index}
               aria-label={`${habit.name}: ${label}`}
             >

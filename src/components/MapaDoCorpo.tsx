@@ -2,7 +2,8 @@ import React, { useCallback, useRef } from 'react';
 import { useAtlasStore } from '../store/useAtlasStore';
 
 export const MapaDoCorpo: React.FC = () => {
-  const { focusOrganId, setFocusOrgan, accessibility, meters } = useAtlasStore();
+  const { focusOrganId, setFocusOrgan, accessibility, getCurrentDisplayData } = useAtlasStore();
+  const { meters } = getCurrentDisplayData();
   const svgRef = useRef<SVGSVGElement>(null);
 
   const handleOrganClick = useCallback((organId: string) => {
