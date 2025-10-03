@@ -296,6 +296,41 @@ export const MapaDoCorpo: React.FC = () => {
           opacity={getOrganOpacity('skin') * 0.6}
           strokeDasharray="5,5"
         />
+
+        {/* Bladder */}
+        <ellipse
+          id="organ-bladder"
+          cx="200"
+          cy="380"
+          rx="18"
+          ry="12"
+          fill={getOrganColor('bladder', '#FFE4B5', '#DEB887')}
+          opacity={getOrganOpacity('bladder')}
+          stroke={focusOrganId === 'bladder' ? '#3b82f6' : '#DEB887'}
+          strokeWidth={focusOrganId === 'bladder' ? '3' : '1.5'}
+          className={`transition-all duration-500 hover:stroke-blue-500 hover:stroke-2 cursor-pointer ${
+            !accessibility.reduceMotion ? 'hover:scale-105' : ''
+          }`}
+          onClick={() => handleOrganClick('bladder')}
+          style={{ transformOrigin: '200px 380px' }}
+          filter="url(#organShadow)"
+        />
+
+        {/* Liver (New Position) */}
+        <path
+          id="organ-liver-new"
+          d="M160 220 Q180 210, 210 215 Q240 220, 250 240 Q245 260, 230 265 Q200 270, 170 265 Q155 250, 160 220 Z"
+          fill={getOrganColor('liver', '#CD853F', '#8B4513')}
+          opacity={getOrganOpacity('liver')}
+          stroke={focusOrganId === 'liver' ? '#3b82f6' : '#8B4513'}
+          strokeWidth={focusOrganId === 'liver' ? '3' : '1.5'}
+          className={`transition-all duration-500 hover:stroke-blue-500 hover:stroke-2 cursor-pointer ${
+            !accessibility.reduceMotion ? 'hover:scale-105' : ''
+          }`}
+          onClick={() => handleOrganClick('liver')}
+          style={{ transformOrigin: '205px 240px' }}
+          filter="url(#organShadow)"
+        />
       </svg>
     </div>
   );

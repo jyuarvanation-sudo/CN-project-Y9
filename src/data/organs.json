@@ -98,5 +98,33 @@
       "healthyColor": "#FDBCB4",
       "affectedColor": "#E6967A"
     }
+  },
+  {
+    "id": "bladder",
+    "name": "Bexiga",
+    "system": "Urinário",
+    "svgId": "organ-bladder",
+    "weight": 0.06,
+    "metrics": ["capacity", "control", "infection_resistance"],
+    "narration": {
+      "what_happens": "A desidratação crónica concentra a urina, irritando a parede da bexiga e aumentando o risco de infeções urinárias em 3-5 vezes. O stress crónico pode causar bexiga hiperativa através da disfunção do sistema nervoso autónomo. O álcool atua como diurético e irritante, causando urgência urinária e interrupção do sono. Estudos mostram que o consumo excessivo de cafeína pode aumentar a frequência urinária em 20-30%.",
+      "what_helps": "Hidratação adequada (1.5-2L/dia) dilui a urina e reduz irritação da bexiga. Exercícios do pavimento pélvico (Kegel) fortalecem os músculos de controlo urinário e podem reduzir incontinência em 60-70% dos casos. Evitar irritantes como álcool, cafeína em excesso e alimentos ácidos melhora os sintomas de bexiga hiperativa. Técnicas de gestão de stress reduzem a urgência urinária relacionada com ansiedade."
+    },
+    "healthyColor": "#FFE4B5",
+    "affectedColor": "#DEB887"
+  },
+  {
+    "id": "liver",
+    "name": "Fígado",
+    "system": "Digestivo",
+    "svgId": "organ-liver-new",
+    "weight": 0.18,
+    "metrics": ["detoxification", "metabolism", "regeneration"],
+    "narration": {
+      "what_happens": "O álcool é metabolizado no fígado, produzindo acetaldeído (altamente tóxico) e causando esteatose hepática, fibrose e eventualmente cirrose. Mesmo 2-3 bebidas diárias podem causar danos hepáticos mensuráveis. Drogas recreativas, especialmente estimulantes e paracetamol em overdose, podem causar necrose hepática aguda. Alimentos ultraprocessados ricos em frutose contribuem para doença hepática não alcoólica (NAFLD), que afeta 25-30% da população adulta.",
+      "what_helps": "O fígado tem capacidade regenerativa notável - pode regenerar até 75% do seu tecido quando os fatores de dano são removidos. Reduzir ou eliminar álcool permite recuperação significativa em 2-4 semanas. Exercício regular melhora a sensibilidade à insulina e reduz gordura hepática em 20-30%. Dieta rica em antioxidantes (vitaminas C, E, selénio) e fibras apoia os processos de desintoxicação. Manter peso saudável é crucial - perda de 7-10% do peso corporal pode reverter esteatose."
+    },
+    "healthyColor": "#CD853F",
+    "affectedColor": "#8B4513"
   ]
 }

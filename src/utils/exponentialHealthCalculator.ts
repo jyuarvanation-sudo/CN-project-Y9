@@ -106,12 +106,13 @@ const HABIT_IMPACTS = {
   
   pornography: {
     // Specialized dopamine/mental impact
-    primary: { stat: 'mentalHealth', impact: -12 },
+    primary: { stat: 'happiness', impact: -14 },
     secondary: [
+      { stat: 'mentalHealth', impact: -10 },
       { stat: 'cognitiveFunction', impact: -6 }
     ],
     minimal: [
-      { stat: 'happiness', impact: -3 }
+      { stat: 'qualityOfLife', impact: -4 }
     ]
   },
   
@@ -269,6 +270,19 @@ const ORGAN_VULNERABILITIES = {
     smoking: 2.5,        // Reduced from 3.2
     hydration: -2.2,     // Reduced from -2.8
     chronic_stress: 2.0  // Reduced from 2.5
+  },
+  bladder: {
+    hydration: -2.5,
+    chronic_stress: 1.8,
+    alcohol: 2.2,
+    processed_diet: 1.5
+  },
+  liver: {
+    alcohol: 4.2,
+    drugs: 3.5,
+    processed_diet: 2.8,
+    healthy_diet: -3.0,
+    exercise: -1.8
   }
 };
 
@@ -280,7 +294,9 @@ const BASELINE_ORGAN_HEALTH = {
   liver: 76,    // Reduced from 80
   kidneys: 82,  // Reduced from 85
   gut: 72,      // Reduced from 75
-  skin: 77      // Reduced from 80
+  skin: 77,     // Reduced from 80
+  bladder: 80,
+  liver: 78
 };
 
 interface ExponentialHealthResult {
@@ -317,7 +333,7 @@ export const calculateExponentialHealth = (habits: HabitLevels): ExponentialHeal
     qualityOfLife: 50,
     physicalFitness: 50,
     overallWellness: 50,
-    lifeExpectancy: 78,
+    lifeExpectancy: 75,
     diseaseRisk: 25,
     // Detailed stats
     cardioStrain: 5,
@@ -409,7 +425,20 @@ export const calculateExponentialHealth = (habits: HabitLevels): ExponentialHeal
   // Ensure all metrics stay within realistic bounds
   Object.keys(healthMetrics).forEach(key => {
     if (key === 'lifeExpectancy') {
-      healthMetrics[key] = Math.max(65, Math.min(95, healthMetrics[key]));
+      // Calculate severe substance abuse penalty
+      const drugsLevel = habits.drugs?.level || 0;
+      const alcoholLevel = habits.alcohol?.level || 0;
+      const smokingLevel = habits.smoking?.level || 0;
+      const pornographyLevel = habits.pornography?.level || 0;
+      
+      // Severe penalty for multiple high-level substance abuse
+      const substanceAbusePenalty = (drugsLevel * 8) + (alcoholLevel * 6) + (smokingLevel * 7) + (pornographyLevel * 3);
+      
+      // Apply penalty to life expectancy
+      healthMetrics[key] -= substanceAbusePenalty;
+      
+      // Enforce new range: 40-95 years
+      healthMetrics[key] = Math.max(40, Math.min(95, healthMetrics[key]));
     } else if (key === 'diseaseRisk') {
       healthMetrics[key] = Math.max(5, Math.min(80, healthMetrics[key]));
     } else if (['cardioStrain', 'inflammation', 'sleepQuality', 'stressLoad', 'recoveryCapacity', 'cognitiveFunction', 'immuneSystem', 'metabolicHealth'].includes(key)) {

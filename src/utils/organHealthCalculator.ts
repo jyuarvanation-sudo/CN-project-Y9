@@ -197,7 +197,7 @@ export const calculateOverallHealth = (habits: HabitLevels): number => {
  * Calculate disease risk based on organ health and specific risk factors
  */
 export const calculateDiseaseRisk = (habits: HabitLevels): number => {
-  const organIds = ['lungs', 'heart', 'brain', 'liver', 'kidneys', 'gut', 'skin'];
+  const organIds = ['lungs', 'heart', 'brain', 'liver', 'kidneys', 'gut', 'skin', 'bladder'];
   let totalRisk = 0;
 
   organIds.forEach(organId => {
