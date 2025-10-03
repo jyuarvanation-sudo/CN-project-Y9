@@ -127,10 +127,3 @@ export const AlternadorComparar: React.FC = () => {
     </div>
   );
 };
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
