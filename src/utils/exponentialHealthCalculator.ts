@@ -276,13 +276,6 @@ const ORGAN_VULNERABILITIES = {
     chronic_stress: 1.8,
     alcohol: 2.2,
     processed_diet: 1.5
-  },
-  liver: {
-    alcohol: 4.2,
-    drugs: 3.5,
-    processed_diet: 2.8,
-    healthy_diet: -3.0,
-    exercise: -1.8
   }
 };
 
@@ -295,8 +288,7 @@ const BASELINE_ORGAN_HEALTH = {
   kidneys: 82,  // Reduced from 85
   gut: 72,      // Reduced from 75
   skin: 77,     // Reduced from 80
-  bladder: 80,
-  liver: 78
+  bladder: 80
 };
 
 interface ExponentialHealthResult {

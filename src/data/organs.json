@@ -97,10 +97,9 @@
       },
       "healthyColor": "#FDBCB4",
       "affectedColor": "#E6967A"
-    }
- },
-  {
-    "id": "bladder",
+    },
+    {
+      "id": "bladder",
     "name": "Bexiga",
     "system": "Urinário",
     "svgId": "organ-bladder",
@@ -126,4 +125,6 @@
     },
     "healthyColor": "#CD853F",
     "affectedColor": "#8B4513"
+  }
   ]
+}
